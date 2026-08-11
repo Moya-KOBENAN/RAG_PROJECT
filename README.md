@@ -138,6 +138,18 @@ tests/                 tests automatiques
 L'API effectue une recherche vectorielle locale et retourne les passages
 pertinents avec leurs sources :
 
+Après le démarrage du service, ouvrir l'interface interactive Swagger dans le
+navigateur :
+
+- interface complète : <http://localhost:8000/docs> ;
+- formulaire de la route de recherche :
+  <http://localhost:8000/docs#/default/query_query_post>.
+
+Dans Swagger, ouvrir `POST /query`, cliquer sur **Try it out**, saisir la
+question puis cliquer sur **Execute**.
+
+La même route peut être appelée directement depuis un terminal :
+
 ```bash
 curl -X POST http://localhost:8000/query \
   -H 'Content-Type: application/json' \
