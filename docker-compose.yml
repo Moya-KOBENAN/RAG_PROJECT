@@ -1,0 +1,56 @@
+services:
+  rag-init:
+    build:
+      context: .
+      pull: false
+    command: ["python", "app.py"]
+    environment:
+      RAG_DOCUMENTS_DIR: /app/data/documents
+      RAG_INDEX_DIR: /app/index/faiss_index
+      RAG_CHUNK_SIZE: "${RAG_CHUNK_SIZE:-500}"
+      RAG_CHUNK_OVERLAP: "${RAG_CHUNK_OVERLAP:-100}"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    volumes:
+      - ./data:/app/data:ro
+      - ./index:/app/index
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  rag-api:
+    build:
+      context: .
+      pull: false
+    restart: unless-stopped
+    init: true
+    depends_on:
+      rag-init:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      RAG_DOCUMENTS_DIR: /app/data/documents
+      RAG_INDEX_DIR: /app/index/faiss_index
+      RAG_CHUNK_SIZE: "${RAG_CHUNK_SIZE:-500}"
+      RAG_CHUNK_OVERLAP: "${RAG_CHUNK_OVERLAP:-100}"
+      RAG_MAX_SEARCH_DISTANCE: "${RAG_MAX_SEARCH_DISTANCE:-2.0}"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    volumes:
+      - ./data:/app/data:ro
+      - ./index:/app/index
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 3g
+    cpus: 2.0
+    stop_grace_period: 30s
